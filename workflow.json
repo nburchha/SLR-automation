@@ -1,0 +1,292 @@
+{
+  "name": "MwA",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        -160
+      ],
+      "id": "4546953d-3016-4bbe-ae54-4d12e063d547",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        864,
+        -160
+      ],
+      "id": "d96bc664-dad6-44ea-b295-f07854dd9069",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Research Question (RQ): {{ $json['research question'] }}\n\nPaper Title: {{ $('get each paper (pdf)').item.json.title }}\n\nPaper text:\n{{ $('extract content out of each pdf').item.json.text }}\n\n---\n\nGUIDELINES\n- “answers” should contain all distinct, concise concepts that answer the RQ.\n- Phrase each answer generically and academically, not as a sentence.\n- Avoid duplication and excessive detail.\n- If you’re uncertain, lower the confidence score.\n- Do not output anything other than the JSON object.\n\n---\n\nOUTPUT FORMAT (strict JSON only):\n{\n  \"paper_id\": \"{{ $('get each paper (pdf)').item.json.paper_id }}\",\n  \"research_question\": \"{{ $json['research question'] }}\",\n  \"answers\": [\n    \"<short categorical phrase 1>\",\n    \"<short categorical phrase 2>\",\n    \"... (0 or more items)\"\n  ],\n  \"confidence\": <float between 0.0 and 1.0>\n}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an automated analyst supporting a Systematic Literature Review (SLR). \nYour task is to read a paper and answer one research question (RQ) in a concise, categorical form — similar to how answers appear in SLR summary tables.\n\nYou must:\n- Base everything ONLY on the given paper text.\n- Produce short, high-level answers or keywords that summarize the paper’s contribution relative to the RQ.\n- Avoid full sentences, explanations, or reasoning.\n- Keep the categories short (1–4 words each).\n- If nothing relevant is found, return an empty list.\n- Return JSON only. No Markdown. No backticks. No prose. No “json” language tags.\n- Do not wrap the JSON in code fences.\n\n!!Only return valid JSON!!"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1088,
+        -160
+      ],
+      "id": "151b719c-3356-4406-a868-6da73c0fc17c",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-5-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        64
+      ],
+      "id": "30919752-4da0-4d1a-b86d-fc364cf1a837",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "uc1VrUJ50NAkjwt6",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/nburchha/slr-automation/main/papers.csv",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -32,
+        -64
+      ],
+      "id": "18e85b05-4730-466b-a11b-efa6e38424e6",
+      "name": "get list of papers"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        192,
+        -64
+      ],
+      "id": "ba37a8c0-c7f4-48f3-b6df-202c95f158ff",
+      "name": "parse list of papers"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.pdf_url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        416,
+        -64
+      ],
+      "id": "b3bb0ae2-2db7-4f93-9c00-71c1621e1a58",
+      "name": "get each paper (pdf)"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        640,
+        -64
+      ],
+      "id": "3bdfcfaf-9742-4e1a-baa8-efd5979c2b3a",
+      "name": "extract content out of each pdf"
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/nburchha/slr-automation/main/resources/research-questions.csv",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        416,
+        -256
+      ],
+      "id": "cd135af3-3e31-4d0e-a228-aadc2b1e6046",
+      "name": "get list of research questions"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        640,
+        -256
+      ],
+      "id": "fa1aa564-a4d8-4601-a005-dc8b52771c72",
+      "name": "parse list of research questions"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "get list of papers",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "get list of research questions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "get list of papers": {
+      "main": [
+        [
+          {
+            "node": "parse list of papers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse list of papers": {
+      "main": [
+        [
+          {
+            "node": "get each paper (pdf)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get each paper (pdf)": {
+      "main": [
+        [
+          {
+            "node": "extract content out of each pdf",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extract content out of each pdf": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "get list of research questions": {
+      "main": [
+        [
+          {
+            "node": "parse list of research questions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse list of research questions": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8b9c85c6-c403-4fa4-a8ac-15a7a35fb834",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d99984af52c4ccf7600598fc6af4fea0508ea5307f8ae877cb657d7eb1d4696b"
+  },
+  "id": "8aEhFgtygXt8TPFm",
+  "tags": []
+}
