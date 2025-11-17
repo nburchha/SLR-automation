@@ -2,6 +2,8 @@
 
 This repository contains the files from the live demo in the `KI in der SLR` on using **n8n** to automate part of a Systematic Literature Review (SLR). The live demo showed how the workflow ingests a list of papers, downloads each PDF, extracts text, and prompts an LLM to answer specific research questions in a compact, tabular format. These instructions help you recreate that experience locally or adapt it to your own corpus.
 
+![n8n workflow](assets/workflow.png)
+
 ## Repository layout
 
 | Path | Purpose |
