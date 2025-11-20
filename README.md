@@ -1,4 +1,4 @@
-# Automated SLR Answering with n8n
+# Automation of the evaluation ('Auswertung') SLR step with n8n
 
 This repository contains the files from the live demo in the `KI in der SLR` on using **n8n** to automate part of a Systematic Literature Review (SLR). The live demo showed how the workflow ingests a list of papers, downloads each PDF, extracts text, and prompts an LLM to answer specific research questions in a compact, tabular format. These instructions help you recreate that experience locally or adapt it to your own corpus.
 
@@ -27,13 +27,13 @@ This repository contains the files from the live demo in the `KI in der SLR` on 
 4. **Configure credentials**:
    - In the “OpenRouter Chat Model” node, create/select credentials that store your OpenRouter API key.
 5. **Adjust file sources (optional)**:
-   - By default the HTTP Request nodes read from the raw files in this GitHub repository (`papers.csv` and the PDFs). If you fork or host the files somewhere else, update the URLs accordingly.
+   - By default, the HTTP Request nodes read from the raw files in this GitHub repository (`papers.csv` and the PDFs). If you fork or host the files somewhere else, update the URLs accordingly.
 6. **Execute the workflow** by clicking “Execute Workflow” on the manual trigger. Watch the data cascade through the nodes and inspect the AI Agent output.
 
 ## How the workflow is wired
 
 1. `get list of papers` fetches `papers.csv`, and `parse list of papers` turns each row into an item that includes the `pdf_url`, `paper_id`, and `title`.
-2. For each paper item, `get each paper (pdf)` downloads the PDF, and `extract content out of each pdf` uses n8n’s file extraction to capture text.
+2. For each paper item, `get each paper (pdf)` downloads the PDF, and `extract content out of each PDF` uses n8n’s file extraction to capture text.
 3. In parallel, `get list of research questions` fetches `resources/research-questions.csv`, and `parse list of research questions` produces one item per RQ.
 4. `Merge` combines the paper stream with the research question stream, generating every paper/question pair.
 5. `AI Agent` (LangChain node) calls the configured OpenRouter model with a tightly scoped prompt to emit JSON answers (`paper_id`, `research_question`, `answers`, `confidence`).
